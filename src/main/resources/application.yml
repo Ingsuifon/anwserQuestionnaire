@@ -58,9 +58,9 @@ commonDS:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/questionnaire?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-    username: root
-    password: root
+    url: jdbc:mysql://39.99.231.41:3306/questionnaire?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: lying
+    password: lying
     driver-class-name: com.mysql.jdbc.Driver
 
 

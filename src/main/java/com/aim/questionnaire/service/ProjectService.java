@@ -71,16 +71,12 @@ public class ProjectService {
      * @return
      */
     public List<Object> queryProjectList(ProjectEntity projectEntity) {
-        List<Object> resultList = new ArrayList<Object>();
         if("".equals(projectEntity.getProjectName())){
             projectEntity.setProjectName(null);
         }
 
         List<Map<String,Object>> proResult = projectEntityMapper.queryProjectList(projectEntity);
-        for(Map<String,Object> proObj : proResult) {
-            resultList.add(proObj);
-        }
-        return resultList;
+        return new ArrayList<>(proResult);
     }
 
     /**

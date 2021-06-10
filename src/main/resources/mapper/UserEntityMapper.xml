@@ -188,5 +188,39 @@
       last_update_date = #{lastUpdateDate,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=VARCHAR}
   </update>
+  <select id="selectAllByName" parameterType="java.lang.String" resultType="com.aim.questionnaire.dao.entity.UserEntity">
+    SELECT id,username,password,status
+    FROM user_info
+    WHERE username = #{username,jdbcType=VARCHAR}
+    AND status = '1'
+  </select>
 
+  <insert id="addUserInfo" parameterType="com.aim.questionnaire.dao.entity.UserEntity">
+    INSERT INTO user_info
+        (id, username, password, start_time, stop_time, status, created_by, creation_date, last_update_date)
+    VALUES (#{id, jdbcType=VARCHAR},
+            #{username, jdbcType=VARCHAR},
+            #{password, jdbcType=VARCHAR},
+            #{startTime, jdbcType=TIMESTAMP},
+            #{stopTime, jdbcType=TIMESTAMP},
+            "1",
+            "admin",
+            CURRENT_DATE,
+            CURRENT_DATE)
+  </insert>
+
+  <select id="queryUserList" resultType="map">
+    SELECT
+    id, username, password, DATE_FORMAT(start_time, "%Y-%m-%d %H:%I:%S") AS startTime, DATE_FORMAT(stop_time, "%Y-%m-%d %H:%I:%S") AS stopTime, status
+    FROM user_info
+    WHERE username IS NOT NULL
+    AND password IS NOT null
+    AND start_time IS NOT NULL
+    AND stop_time IS NOT NULL
+  </select>
+
+  <select id="queryDateByName" resultType="java.util.Date">
+    SELECT start_time
+    FROM user_info
+  </select>
 </mapper>
