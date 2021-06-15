@@ -15,7 +15,7 @@ public class ExcelUtil {
      * @param wb HSSFWorkbook对象
      * @return
      */
-    public static HSSFWorkbook getHSSFWorkbook(String sheetName, String []title, String [][]values, HSSFWorkbook wb){
+    public static HSSFWorkbook getHSSFWorkbook (String sheetName, String []title, String [][]values, HSSFWorkbook wb){
 
         // 第一步，创建一个HSSFWorkbook，对应一个Excel文件
         if(wb == null){

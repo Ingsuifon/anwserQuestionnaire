@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="answerQuestionCss/login.css">
 </head>
 <body id="body1" class="fp-viewing">
-    <div class="fullpage-wrapper">
+    <div id="fullpage" class="fullpage-wrapper">
         <div class="fullpage-main"></div>
         <div id="divSojump" class="validate-box">
             <fieldset class="validate-wrapper" style="padding: 0 50px;">
@@ -25,10 +25,13 @@
                     </li>
                 </ul>
             </fieldset>
-            <fieldset style="text-align: center; margin-top: 60px; padding: 0 50px;">
-                <button name="LoginButton" id="LoginButton" class="submitbutton" onclick="login()" onmouseover="this.className='submitbutton submitbutton_hover';" onmouseout="this.className='submitbutton';" style="color:White;">登 录</button>
+            <fieldset style="text-align: center; margin-top: 60px; padding: 0 50px; ">
+                <button name="LoginButton" id="LoginButton2" class="submitbutton" onclick="login()" onmouseover="this.className='submitbutton submitbutton_hover';" onmouseout="this.className='submitbutton';" style="color:White; margin-bottom: 10px">登 录</button>
+                <span style="color: red; line-height: 28px;"></span>
+                <button name="LoginButton" id="LoginButton" class="submitbutton" onclick="faceLogin()" onmouseover="this.className='submitbutton submitbutton_hover';" onmouseout="this.className='submitbutton';" style="color:White;">人脸识别</button>
                 <span style="color: red; line-height: 28px;"></span>
             </fieldset>
+
         </div>
     </div>
     <script src="../plugins/jQuery/jquery-1.12.4.min.js"></script>

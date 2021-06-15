@@ -1,6 +1,7 @@
 package com.aim.questionnaire.dao;
 
 import com.aim.questionnaire.dao.entity.UserEntity;
+import org.apache.catalina.User;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.springframework.stereotype.Repository;
@@ -19,7 +20,7 @@ public interface UserEntityMapper {
      */
     UserEntity selectAllByName(String username);
     void addUserInfo(UserEntity userEntity);
-    List<Map<String, Object>> queryUserList();
-
+    List<Map<String, Object>> queryUserList(UserEntity userEntity);
+    Map<String, Object> queryUserListById(String id);
     List<Date> queryDateByName();
 }

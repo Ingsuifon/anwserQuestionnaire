@@ -197,26 +197,45 @@
 
   <insert id="addUserInfo" parameterType="com.aim.questionnaire.dao.entity.UserEntity">
     INSERT INTO user_info
-        (id, username, password, start_time, stop_time, status, created_by, creation_date, last_update_date)
+        (id, username, password, start_time, stop_time, status, created_by, creation_date, last_updated_by, last_update_date)
     VALUES (#{id, jdbcType=VARCHAR},
             #{username, jdbcType=VARCHAR},
             #{password, jdbcType=VARCHAR},
             #{startTime, jdbcType=TIMESTAMP},
             #{stopTime, jdbcType=TIMESTAMP},
-            "1",
-            "admin",
-            CURRENT_DATE,
-            CURRENT_DATE)
+            #{status, jdbcType=VARCHAR},
+            #{createdBy, jdbcType=CHAR},
+            #{creationDate, jdbcType=TIMESTAMP},
+            #{lastUpdatedBy, jdbcType=CHAR},
+            #{lastUpdateDate, jdbcType=TIMESTAMP})
   </insert>
 
-  <select id="queryUserList" resultType="map">
+  <select id="queryUserList" parameterType="com.aim.questionnaire.dao.entity.UserEntity" resultType="map">
     SELECT
-    id, username, password, DATE_FORMAT(start_time, "%Y-%m-%d %H:%I:%S") AS startTime, DATE_FORMAT(stop_time, "%Y-%m-%d %H:%I:%S") AS stopTime, status
+    id, username, password, DATE_FORMAT(start_time, "%Y-%m-%d %H:%I:%S") AS startTime, DATE_FORMAT(stop_time, "%Y-%m-%d %H:%I:%S") AS stopTime,
+           status, created_by AS createdBy, DATE_FORMAT(creation_date, "%Y-%m-%d %H:%I:%S") AS creationDate, last_updated_by AS lastUpdatedBy, last_update_date AS lastUpdateDate
     FROM user_info
     WHERE username IS NOT NULL
-    AND password IS NOT null
+    AND password IS NOT NULL
     AND start_time IS NOT NULL
     AND stop_time IS NOT NULL
+    AND status IS NOT NULL
+    <if test="username != null">
+      AND username LIKE '%${username}%'
+    </if>
+  </select>
+
+  <select id="queryUserListById" parameterType="java.lang.String" resultType="map">
+    SELECT
+      id, username, password, DATE_FORMAT(start_time, "%Y-%m-%d %H:%I:%S") AS start_time, DATE_FORMAT(stop_time, "%Y-%m-%d %H:%I:%S") AS stop_time,
+      status, created_by, DATE_FORMAT(creation_date, "%Y-%m-%d %H:%I:%S") AS creation_date, last_updated_by AS last_updated_by, DATE_FORMAT(last_update_date, "%Y-%m-%d %H:%I:%S") AS last_update_date
+    FROM user_info
+    WHERE id = #{id, jdbcType=VARCHAR}
+    AND username IS NOT NULL
+    AND password IS NOT NULL
+    AND start_time IS NOT NULL
+    AND stop_time IS NOT NULL
+    AND status IS NOT NULL
   </select>
 
   <select id="queryDateByName" resultType="java.util.Date">
