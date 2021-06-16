@@ -194,107 +194,6 @@ function openCreateUserPage(id, value) {
     window.location.href = 'createNewUser.html';
 }
 
-//批量导入
-// function batchImport() {
-//     let inputObj = document.createElement('input')
-//     inputObj.setAttribute('type','file');
-//     inputObj.setAttribute('accept', 'application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-//     inputObj.setAttribute("style",'visibility: hidden');
-//     inputObj.click();
-//     inputObj.onchange = function () {
-//         let file = inputObj.files[0];
-//         let form = new FormData();
-//         form.append("file", file);
-//         form.append("fileName", file.name);
-//         let xhr = new XMLHttpRequest();
-//         let action = "http://localhost:8085/admin/batchImport";
-//         xhr.open("POST", action);
-//         xhr.send(form);
-//         xhr.onreadystatechange = function () {
-//             if (xhr.readyState === 4 && xhr.status === 200) {
-//                 let resultObj = JSON.parse(xhr.responseText);
-//                 //处理结果
-//                 if (resultObj.code !== -1) {
-//                     layer.msg("用户信息导入成功", {icon: 1});
-//                     setTimeout(function () {
-//                         window.location.href = 'userManage.html';
-//                     }, 1000);
-//                 }
-//             }
-//         }
-//     }
-// }
-
-
-// 读取本地excel文件
-function readWorkbookFromLocalFile(file, callback) {
-    let reader = new FileReader();
-    reader.onload = function(e) {
-        let data = e.target.result;
-        let workbook = XLSX.read(data, {type: 'binary'});
-        if(callback) callback(workbook);
-    };
-    reader.readAsBinaryString(file);
-}
-
-// 从网络上读取某个excel文件，url必须同域，否则报错
-function readWorkbookFromRemoteFile(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('get', url, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = function(e) {
-        if(xhr.status === 200) {
-            var data = new Uint8Array(xhr.response)
-            var workbook = XLSX.read(data, {type: 'array'});
-            if(callback) callback(workbook);
-        }
-    };
-    xhr.send();
-}
-
-// 读取 excel文件
-function outputWorkbook(workbook) {
-    var sheetNames = workbook.SheetNames; // 工作表名称集合
-    sheetNames.forEach(name => {
-        var worksheet = workbook.Sheets[name]; // 只能通过工作表名称来获取指定工作表
-        for(var key in worksheet) {
-            // v是读取单元格的原始值
-            console.log(key, key[0] === '!' ? worksheet[key] : worksheet[key].v);
-        }
-    });
-}
-
-function readWorkbook(workbook) {
-    var sheetNames = workbook.SheetNames; // 工作表名称集合
-    var worksheet = workbook.Sheets[sheetNames[0]]; // 这里我们只读取第一张sheet
-    console.log(XLSX.utils.sheet_to_json(worksheet));
-}
-
-// 将csv转换成表格
-function csv2table(csv)
-{
-    var html = '<table>';
-    var rows = csv.split('\n');
-    rows.pop(); // 最后一行没用的
-    rows.forEach(function(row, idx) {
-        var columns = row.split(',');
-        columns.unshift(idx+1); // 添加行索引
-        if(idx == 0) { // 添加列索引
-            html += '<tr>';
-            for(var i=0; i<columns.length; i++) {
-                html += '<th>' + (i==0?'':String.fromCharCode(65+i-1)) + '</th>';
-            }
-            html += '</tr>';
-        }
-        html += '<tr>';
-        columns.forEach(function(column) {
-            html += '<td>'+column+'</td>';
-        });
-        html += '</tr>';
-    });
-    html += '</table>';
-    return html;
-}
 
 function table2csv(table) {
     var csv = [];
@@ -374,11 +273,6 @@ function openDownloadDialog(url, saveName)
     aLink.dispatchEvent(event);
 }
 
-function loadRemoteFile(url) {
-    readWorkbookFromRemoteFile(url, function(workbook) {
-        readWorkbook(workbook);
-    });
-}
 
 function exportExcel() {
     var csv = table2csv($('#result table')[0]);

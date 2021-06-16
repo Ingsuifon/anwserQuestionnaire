@@ -29,6 +29,16 @@ function login() {
 
 function faceLogin() {
     //获取摄像头对象
+    if (document.getElementById("capture") !== null) {
+        let cap = document.getElementById("capture");
+        document.getElementById("divSojump").removeChild(cap);
+        cap.remove();
+        document.getElementById("canvas").remove();
+        let vid = document.getElementById("video");
+        document.getElementById("divSojump").removeChild(vid);
+        vid.remove();
+        return;
+    }
     let capture = document.createElement("button");
     capture.setAttribute("id", "capture");
     capture.innerHTML = "登录";
@@ -107,10 +117,10 @@ function loginSuccess(result){
         layer.msg(result.message, {icon:1});
         setCookie('isLogin','1');
         setCookie('userId',result.data.id);
-        setCookie('userName',UserNameText);
+        setCookie('userName', result.data.username);
         setCookie('power',result.data.role);
-        setCookie('modelId',result.data.modelId)
-        window.location.href = "myQuestionnaires.html"
+        setCookie('modelId',result.data.modelId);
+        window.location.href = "myQuestionnaires.html";
     }else{
         layer.msg("此用户不存在",{icon:2});
     }

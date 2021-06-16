@@ -2,33 +2,24 @@ package com.aim.questionnaire.controller;
 
 import com.aim.questionnaire.beans.HttpResponseEntity;
 import com.aim.questionnaire.common.Constans;
-import com.aim.questionnaire.common.utils.DateUtil;
 import com.aim.questionnaire.common.utils.GsonUtils;
 import com.aim.questionnaire.common.utils.HttpUtil;
 import com.aim.questionnaire.dao.entity.UserEntity;
 import com.aim.questionnaire.service.UserService;
 import com.baidu.aip.face.AipFace;
+import com.baidu.aip.nlp.AipNlp;
 import com.baidu.aip.util.Base64Util;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.ss.usermodel.Cell;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.convert.ReadingConverter;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -37,18 +28,20 @@ import java.util.*;
 @RestController
 @RequestMapping("/admin")
 public class UserController {
-    private static final String APP_ID = "24370455";
-    private static final String API_KEY = "Ebgvr5Fq5zrIAmnLI8uINWDH";
-    private static final String SECRET_KEY = "05VvCwy4lEayVT8RKSOylnyoMPBw9TQ5";
     private static final AipFace client;
+    private static final AipNlp client2;
 
     @Autowired
     private UserService userService;
 
     static  {
-        client = new AipFace(APP_ID, API_KEY, SECRET_KEY);
+        client = new AipFace("24370455", "Ebgvr5Fq5zrIAmnLI8uINWDH", "05VvCwy4lEayVT8RKSOylnyoMPBw9TQ5");
         client.setConnectionTimeoutInMillis(2000);
         client.setSocketTimeoutInMillis(60000);
+
+        client2 = new AipNlp("24377165", "x9XlqfImBug8qnVqcAS0Qu9G", "ZoDw1jkpbPbboPV0Lni8GI1zAseaSfoP");
+        client2.setConnectionTimeoutInMillis(2000);
+        client2.setSocketTimeoutInMillis(60000);
     }
 
     @RequestMapping(value = "/userLogin", method = RequestMethod.POST)
@@ -80,12 +73,16 @@ public class UserController {
     }
 
     @RequestMapping("/queryUserList")
-    public HttpResponseEntity queryUserList(@RequestBody(required = false) UserEntity userEntity) {
-        System.out.println(userEntity.getUsername());
+    public HttpResponseEntity queryUserList(@RequestBody(required = false) Map<String, Object> map) {
         HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+        UserEntity user = new UserEntity();
+        user.setUsername(map.get("username").toString());
         Map<String, Object> res = new HashMap<>();
-        List<Map<String, Object>> list = userService.queryUserList(userEntity);
+        PageHelper.startPage((Integer)map.get("pageNum"), (Integer)map.get("pageSize"));
+        List<Map<String, Object>> list = userService.queryUserList(user);
+        PageInfo<Map<String, Object>> info = new PageInfo<>(list);
         res.put("list", list);
+        res.put("total", info.getTotal());
         httpResponseEntity.setData(res);
         httpResponseEntity.setCode(Constans.SUCCESS_CODE);
         return httpResponseEntity;
@@ -147,16 +144,12 @@ public class UserController {
 
         String url = "https://aip.baidubce.com/rest/2.0/face/v3/match";
         try {
-
             String param = GsonUtils.toJson(map);
-
-            // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
             String accessToken = "24.a30e137d2a902ac860cae950f817ed0e.2592000.1626336010.282335-24370455";
-
             String result = HttpUtil.post(url, accessToken, "application/json", param);
             JSONObject res = new JSONObject(result);
             if (res.getJSONObject("result").getDouble("score") > 90) {
-                //httpResponseEntity.setData(res);
+                httpResponseEntity.setData(userService.selectAllByName("admin"));
                 httpResponseEntity.setCode(Constans.SUCCESS_CODE);
                 httpResponseEntity.setMessage("Success");
             }
@@ -168,14 +161,19 @@ public class UserController {
         return httpResponseEntity;
     }
 
-    private static JSONObject searchFace(String imgStr, String groupIdList, String userId) {
-        String imageType = "BASE64";
-        HashMap<String, String> options = new HashMap<>();
-        options.put("quality_control", "NORMAL");
-        options.put("liveness_control", "LOW");
-        options.put("user_id", "admin");
-        options.put("max_user_num", "3");
-        return client.search(imgStr, imageType, groupIdList, options);
+    @RequestMapping("/customerService")
+    public HttpResponseEntity custService(@RequestBody Map<String, Object> map) {
+
+        String url = "https://aip.baidubce.com/rpc/2.0/nlp/v2/simnet";
+        try {
+            String param = GsonUtils.toJson(map);
+            String accessToken = "24.a30e137d2a902ac860cae950f817ed0e.2592000.1626336010.282335-24370455" + "&charset=UTF-8";
+            String result = HttpUtil.post(url, accessToken, "application/json", param);
+            JSONObject res = new JSONObject(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static byte[] FileToByte(File file) throws IOException {
