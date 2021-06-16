@@ -4,7 +4,9 @@ import com.aim.questionnaire.beans.HttpResponseEntity;
 import com.aim.questionnaire.common.Constans;
 import com.aim.questionnaire.common.utils.GsonUtils;
 import com.aim.questionnaire.common.utils.HttpUtil;
+import com.aim.questionnaire.dao.entity.AutoAnswerEntity;
 import com.aim.questionnaire.dao.entity.UserEntity;
+import com.aim.questionnaire.service.AutoAnswerService;
 import com.aim.questionnaire.service.UserService;
 import com.baidu.aip.face.AipFace;
 import com.baidu.aip.nlp.AipNlp;
@@ -33,6 +35,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AutoAnswerService autoAnswerService;
 
     static  {
         client = new AipFace("24370455", "Ebgvr5Fq5zrIAmnLI8uINWDH", "05VvCwy4lEayVT8RKSOylnyoMPBw9TQ5");
@@ -162,18 +167,40 @@ public class UserController {
     }
 
     @RequestMapping("/customerService")
-    public HttpResponseEntity custService(@RequestBody Map<String, Object> map) {
-
+    public HttpResponseEntity custService(@RequestBody Map<String, String> m) {
+        HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
+        List<AutoAnswerEntity> database = autoAnswerService.selectAll();
         String url = "https://aip.baidubce.com/rpc/2.0/nlp/v2/simnet";
+        Map<String, String> map = new HashMap<>();
+        map.put("text_1", m.get("text"));
+        String param;
+        String accessToken = "24.fce3547d83e35938de88a529069a355f.2592000.1626404797.282335-24377165";
+        String result = null;
+        double max = 0;
+        String answer = "";
+        JSONObject res;
         try {
-            String param = GsonUtils.toJson(map);
-            String accessToken = "24.a30e137d2a902ac860cae950f817ed0e.2592000.1626336010.282335-24370455" + "&charset=UTF-8";
-            String result = HttpUtil.post(url, accessToken, "application/json", param);
-            JSONObject res = new JSONObject(result);
+            for (AutoAnswerEntity e: database) {
+                System.out.println(e.getQuestion());
+                map.put("text_2", e.getQuestion());
+                param = GsonUtils.toJson(map);
+                result = HttpUtil.postGeneralUrl(url + "?charset=UTF-8&access_token=" + accessToken, "application/json", param, "UTF-8");
+                res = new JSONObject(result);
+                if (res.getDouble("score") > max) {
+                    max = res.getDouble("score");
+                    answer = e.getAnswer();
+                }
+            }
+            System.out.println(answer);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        if (max < 0.4)
+            answer = "对不起，没有明白您的意思，请您换个问题吧！";
+        httpResponseEntity.setData(answer);
+        httpResponseEntity.setCode(Constans.SUCCESS_CODE);
+        httpResponseEntity.setMessage("Good");
+        return httpResponseEntity;
     }
 
     private static byte[] FileToByte(File file) throws IOException {
